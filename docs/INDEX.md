@@ -21,6 +21,7 @@ Mapa de todos os arquivos de documentação do projeto.
 |---------|-----------|-------------|
 | [Architecture.md](Architecture.md) | Diagramas Mermaid: infra, auth, fluxo de dados, SiteSettings, herança de planos, Freshdesk | Ao entender o sistema ou **projetar novas features** |
 | [AdminGuide.md](AdminGuide.md) | Cada seção do painel admin: campos, estrutura, permissões, passo a passo para adicionar novas seções | Ao **modificar o admin** ou adicionar seção |
+| [StyleGuide.md](StyleGuide.md) | Design system completo: tokens CSS, tipografia, animações, componentes, regras anti-regressão | Ao **criar ou modificar componentes** de UI |
 | [INDEX.md](INDEX.md) | Este arquivo — mapa de toda a documentação | Ao procurar onde está algo |
 
 ---
@@ -47,6 +48,7 @@ Mapa de todos os arquivos de documentação do projeto.
 2. CONTRIBUTING.md        → Padrões e quickstart para IA
 3. docs/Architecture.md   → Como o sistema funciona (diagramas)
 4. docs/AdminGuide.md     → O que cada seção do admin controla
+5. docs/StyleGuide.md     → Design system e tokens CSS (ao criar UI)
    ... demais conforme necessidade
 ```
 
