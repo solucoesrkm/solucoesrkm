@@ -111,7 +111,9 @@ solucoesrkm/
 │   │   └── index.ts                  # Tipos compartilhados (SettingsChange, ActionResult)
 │   │
 │   ├── constants/                    # HISTORY_KEYS, MAX_HISTORY_ENTRIES
-│   ├── config/                       # Configurações de defaults
+│   ├── config/
+│   │   ├── app.config.ts             # TRACKA_APP_URL, LANDING_URL — sempre importar daqui
+│   │   └── defaults.ts               # Valores padrão de todas as SiteSettings keys
 │   ├── infrastructure/               # Prisma, logger
 │   └── lib/
 │       ├── auth.ts                   # Re-export de @/domain/auth/auth
@@ -494,7 +496,10 @@ docs/contributing-guide
 [ ] Novos tópicos de help em PT E EN
 [ ] getSiteSettings/updateSiteSettings — sem Prisma direto em componentes
 [ ] Links usando @/i18n/navigation, não next/link
+[ ] URLs do app via TRACKA_APP_URL de @/config/app.config (não hardcoded)
+[ ] Cores via CSS variables — sem hex/rgba hardcoded em componentes
 [ ] CHANGELOG.md atualizado
+[ ] Security headers em next.config.ts já configurados — não remover nem enfraquecer
 ```
 
 ---
@@ -535,6 +540,16 @@ error: failed to set up sandbox: sandboxing is not supported on Windows
 | Links via `@/i18n/navigation` | 404 por falta de locale prefix |
 | Strings em `messages/*.json` | UI quebrada ou texto hardcoded |
 | Sem Prisma direto em componentes | Lógica de auth/diff bypassada |
+| URLs via `@/config/app.config` | Triplicação de hardcode; difícil de trocar domínio |
+| Cores via CSS variables (globals.css) | Design system diverge; bugs visuais silenciosos |
+| Não remover security headers do next.config.ts | Exposição a XSS, clickjacking, MIME sniffing |
+
+### Trade-off conhecido (B2)
+
+> `BRL_PRICES` em `PricingSection.tsx` tem preços hardcoded `{ plus: 9.90, pro: 19.90 }` para conversão de moeda na UI em EN.  
+> **Risco**: se o admin alterar os preços no Tracka, a conversão estimada fica imprecisa.  
+> **Decisão consciente**: parsear `plan.price` ("R$ 9,90") tem risco de localização; o drift é improvável e o impacto é apenas visual (texto de preço convertido).  
+> **Se os preços mudarem**: atualizar o objeto `BRL_PRICES` no arquivo.  
 
 ### Adicionando nova seção na landing
 

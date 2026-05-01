@@ -232,6 +232,22 @@ Dois níveis de glass disponíveis como `@utility`:
 /* Âmbar → laranja */
 ```
 
+### Trial badge e overlay
+
+```css
+--landing-gradient-trial:  linear-gradient(135deg, #f59e0b, #d97706);  /* Badge âmbar */
+--landing-trial-overlay:   linear-gradient(135deg, rgba(245,158,11,0.15), transparent);  /* Overlay translúcido do card */
+```
+
+**Uso correto:**
+```tsx
+// Badge do plano Trial
+style={{ background: 'var(--landing-gradient-trial)' }}
+
+// Overlay translúcido (border glow do card)
+style={{ background: 'var(--landing-trial-overlay)' }}
+```
+
 ### Fundo da página
 
 ```css
@@ -645,6 +661,9 @@ import Link from 'next/link';
 // ❌ rgba sem variável quando variável existe
 style={{ background: 'rgba(255,255,255,0.03)' }}
 
+// ❌ URL hardcoded do app Tracka
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
+
 // ❌ Fonte não-Inter
 fontFamily: 'Arial'
 ```
@@ -666,17 +685,22 @@ import { Link } from '@/i18n/navigation';
 
 // ✅ Gradiente via variável
 <h1 className="landing-title-gradient">
+
+// ✅ URL centralizada
+import { TRACKA_APP_URL } from '@/config/app.config';
 ```
 
 ### Checklist ao criar nova seção
 
 ```
 [ ] Usa CSS variables do globals.css — sem hardcode
+[ ] Trial usa --landing-gradient-trial (badge) e --landing-trial-overlay (card border)
 [ ] Animação via classes utilitárias (@utility animate-*)
 [ ] Card usa --landing-card-bg + --landing-card-border
 [ ] Hover state definido (transform, glow, color change)
 [ ] Responsivo: mobile-first com breakpoints md/lg
 [ ] Links via @/i18n/navigation
+[ ] URLs do app via TRACKA_APP_URL de @/config/app.config
 [ ] Strings em messages/pt.json e messages/en.json
 [ ] Sem texto hardcoded em PT ou EN no componente
 ```

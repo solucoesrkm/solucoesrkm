@@ -5,6 +5,39 @@ Formato: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) | Versionament
 
 ---
 
+## [0.4.1] — 2026-05-01
+
+### Security
+
+- **HTTP Security Headers** em `next.config.ts` para todas as rotas:
+  - `X-Frame-Options: SAMEORIGIN` — previne clickjacking
+  - `X-Content-Type-Options: nosniff` — previne MIME sniffing
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy` — desativa câmera, microfone e geolocalização
+  - `Content-Security-Policy` — whitelist de origens (Freshworks, GTM, Google Fonts, AwesomeAPI)
+
+### Fixed
+
+- **`FeaturesSection.tsx`**: corrigido `React.ReactNode` sem import → `import type { ReactNode } from 'react'`
+- **`PricingSection.tsx`**: `includedLabel` fallback agora é locale-aware (`'O que está incluído'` em PT, `"What's included"` em EN)
+- **`PricingSection.tsx`**: tooltips usam `var(--color-bg-elevated)` em vez de `rgba(15,15,30,0.95)` hardcoded
+- **`PricingSection.tsx`**: badge e overlay do trial usam tokens CSS `--landing-gradient-trial` e `--landing-trial-overlay`
+- **`Button.module.css`**: `.primary` usa `var(--color-brand-primary)` em vez de `rgb(79,70,229)` hardcoded
+- **`AdminGuide.md`**: corrigido horário do cron (03:30 UTC, estava documentado como 06:00)
+- **`.env.example`**: adicionadas `TRACKA_API_URL` e `TRACKA_LANDING_API_KEY` com comentários explicativos
+
+### Added
+
+- **`src/config/app.config.ts`**: constantes `TRACKA_APP_URL` e `LANDING_URL` centralizadas — `HeroSection`, `LandingHeader` e `PricingSection` importam daqui (elimina triplicação)
+- **`globals.css`**: tokens `--landing-gradient-trial` e `--landing-trial-overlay` para o plano Trial
+- **`docs/StyleGuide.md`**: guia completo de design system (19 seções) — tokens CSS, tipografia, animações, componentes, regras anti-regressão
+- **`docs/AdminGuide.md`**: referência completa do painel admin (7 seções), campos, permissões e passo a passo para adicionar novas seções
+- **`docs/Architecture.md`**: diagramas Mermaid de infra, auth, fluxo SSR, SiteSettings, herança de planos e Freshdesk
+- **`docs/INDEX.md`**: mapa de navegação de toda a documentação
+- **`CONTRIBUTING.md`**: guia completo para agentes de IA e desenvolvedores (16 seções) — invariantes, quickstart, checklist pré-PR
+
+---
+
 ## [0.4.0] — 2026-05-01
 
 ### Added
