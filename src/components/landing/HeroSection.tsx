@@ -16,9 +16,10 @@ interface HeroSectionProps {
     badgeOriginal: string;
     ctaPrimary: string;
     ctaSecondary: string;
+    locale?: string;
 }
 
-export function HeroSection({ title, subtitle, image, badgeNew, badgeOriginal, ctaPrimary, ctaSecondary }: HeroSectionProps) {
+export function HeroSection({ title, subtitle, image, badgeNew, badgeOriginal, ctaPrimary, ctaSecondary, locale = 'pt' }: HeroSectionProps) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
 
     return (
@@ -84,7 +85,7 @@ export function HeroSection({ title, subtitle, image, badgeNew, badgeOriginal, c
                 {/* CTAs → App Tracka */}
                 <div className="flex flex-wrap gap-4 pt-3">
                     <a
-                        href={`${appUrl}/register`}
+                        href={`${appUrl}/${locale}/register`}
                         className="group flex items-center gap-3 px-8 py-3.5 rounded-xl font-bold text-lg text-white transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/25"
                         style={{ background: 'var(--landing-gradient-cta)' }}
                     >

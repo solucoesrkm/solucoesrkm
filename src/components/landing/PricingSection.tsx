@@ -56,11 +56,14 @@ interface PricingSectionProps {
     popularLabel?: string;
     featureTooltips?: Record<string, string>;
     trialNoCardText?: string;
+    /** Texto do separador de herança. Ex: 'Tudo do {plan}, mais:' */
+    inheritanceLabel?: string;
 }
 
 export function PricingSection({
     items, locale = 'pt', title, subtitle, trialText,
-    includedLabel, popularLabel, featureTooltips, trialNoCardText
+    includedLabel, popularLabel, featureTooltips, trialNoCardText,
+    inheritanceLabel,
 }: PricingSectionProps) {
     const [mounted, setMounted] = useState(false);
     const [currency, setCurrency] = useState<CurrencyInfo>({ code: 'USD', symbol: '$', name: 'US Dollar' });
@@ -293,9 +296,48 @@ export function PricingSection({
 
                                 {/* Features */}
                                 <div className="flex-1 space-y-3 relative z-10">
-                                    {plan.features.map((feature, idx) => renderFeature(feature, idx, plan.isPopular, false, isTrial))}
-                                    {plan.excludedFeatures && plan.excludedFeatures.length > 0 &&
-                                        plan.excludedFeatures.map((feature, idx) => renderFeature(feature, idx, plan.isPopular, true, isTrial))}
+                                    {/* Separador de herança minimalista */}
+                                    {!isTrial && plan.inheritance?.inheritsFrom && (
+                                        <div className="pb-1">
+                                            <p className="text-[11px] text-gray-500 font-medium tracking-wide">
+                                                {(inheritanceLabel || (locale === 'en' ? 'Everything in {plan}, plus:' : 'Tudo do {plan}, mais:'))
+                                                    .replace('{plan}', plan.inheritance.inheritsFromName || '')}
+                                            </p>
+                                            <div className="mt-1.5 border-t border-white/10" />
+                                        </div>
+                                    )}
+
+                                    {/* Features: exclusive se herda, lista completa caso contrário */}
+                                    {(!isTrial && plan.inheritance?.inheritsFrom
+                                        ? plan.inheritance.exclusiveFeatures.map((f, idx) => {
+                                            const tooltip = f.tooltip || getTooltip(f.label, locale, featureTooltips);
+                                            const checkColor = plan.isPopular ? 'bg-indigo-500/20' : 'bg-emerald-500/15';
+                                            const checkIcon = plan.isPopular ? 'text-indigo-400' : 'text-emerald-400';
+                                            return (
+                                                <div key={idx} className="flex items-start gap-3">
+                                                    <div className={`flex items-center justify-center w-5 h-5 rounded-full shrink-0 mt-0.5 ${checkColor}`}>
+                                                        <Check className={`w-3.5 h-3.5 ${checkIcon}`} />
+                                                    </div>
+                                                    {tooltip ? (
+                                                        <span className="text-sm relative group cursor-help inline-flex items-center gap-1 text-gray-300">
+                                                            {f.label}
+                                                            <Info className="w-3 h-3 text-gray-600 group-hover:text-indigo-400 transition-colors shrink-0" />
+                                                            <span className="absolute bottom-full left-0 mb-2 w-60 p-2.5 rounded-lg text-xs text-gray-200 leading-relaxed invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none" style={{
+                                                                background: 'rgba(15, 15, 30, 0.95)',
+                                                                border: '1px solid var(--color-glass-border-strong)',
+                                                                backdropFilter: 'blur(8px)',
+                                                            }}>
+                                                                {tooltip}
+                                                            </span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-sm text-gray-300">{f.label}</span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
+                                        : plan.features.map((feature, idx) => renderFeature(feature, idx, plan.isPopular, !!feature.excluded, isTrial))
+                                    )}
                                 </div>
                             </div>
                         );

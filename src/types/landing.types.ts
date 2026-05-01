@@ -21,6 +21,15 @@ export interface PricingFeature {
     key: string;
     /** Texto de exibição (ex: '50 Itens', 'Histórico de uso') */
     text: string;
+    /** Se true, feature não está incluída neste plano (exibida riscada) */
+    excluded?: boolean;
+}
+
+/** Herança detectada de plano. Vinda da API do Tracka. */
+export interface PlanInheritance {
+    inheritsFrom: string | null;
+    inheritsFromName: string | null;
+    exclusiveFeatures: { label: string; enabled: boolean; tooltip?: string }[];
 }
 
 /** Parâmetros de um plano de pricing. */
@@ -34,6 +43,8 @@ export interface PricingParams {
     isTrial?: boolean;
     buttonText: string;
     buttonLink: string;
+    /** Herança automática detectada pelo Tracka. Opcional — compatível com versões antigas da API. */
+    inheritance?: PlanInheritance;
 }
 
 /** Depoimento de cliente. */

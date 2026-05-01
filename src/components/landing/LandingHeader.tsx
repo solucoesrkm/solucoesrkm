@@ -20,9 +20,10 @@ interface LandingHeaderProps {
     navPricing: string;
     navAbout: string;
     loginText: string;
+    locale?: string;
 }
 
-export function LandingHeader({ logoText, navHome, navFeatures, navPricing, navAbout, loginText }: LandingHeaderProps) {
+export function LandingHeader({ logoText, navHome, navFeatures, navPricing, navAbout, loginText, locale = 'pt' }: LandingHeaderProps) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
 
     return (
@@ -52,7 +53,7 @@ export function LandingHeader({ logoText, navHome, navFeatures, navPricing, navA
                 <div className="flex items-center gap-4">
                     <LanguageSwitcher />
                     <a
-                        href={`${appUrl}/login`}
+                        href={`${appUrl}/${locale}/login`}
                         className="text-white px-5 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 hover:scale-105"
                         style={{ background: 'var(--landing-gradient-cta)' }}
                     >

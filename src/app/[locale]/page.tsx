@@ -73,102 +73,55 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
  * Busca planos da API pública do Tracka.
  * Aplica filtro de visibilidade (pricing_visibility do admin).
  * Fallback: usa traduções i18n se a API falhar.
+ *
+ * A partir de v0.7.3 a API retorna `inheritance` automaticamente.
  */
-async function fetchPricing(t: any): Promise<PricingParams[]> {
+async function fetchPricing(t: any, locale: string): Promise<PricingParams[]> {
     noStore(); // Sempre buscar dados frescos do banco
     const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
     const visibility: PricingVisibility | null = await getSiteSettings('pricing_visibility');
 
-    // Tenta buscar da API do Tracka (mesmo endpoint do admin)
+    // Tenta buscar da API pública do Tracka (retorna inheritance pronto)
     let plans: PricingParams[] = [];
     try {
-        const res = await fetch(`${APP_URL}/api/plan-config`, {
+        const res = await fetch(`${APP_URL}/api/public/plans?locale=${locale}`, {
             cache: 'no-store',
         });
         if (res.ok) {
-            const plansConfig: Record<string, any> = await res.json();
+            const data = await res.json();
+            // API retorna array de planos com campos padronizados
+            const apiPlans: any[] = Array.isArray(data) ? data : (data.plans || []);
 
-            // Transformar PlansConfig → PricingParams[] (inclui trial)
-            const PLAN_ORDER = ['free', 'trial', 'plus', 'pro'];
-            for (const key of PLAN_ORDER) {
-                const plan = plansConfig[key];
-                if (!plan) continue;
-                const lim = plan.limits || {};
+            plans = apiPlans
+                .filter((p: any) => p.planType !== 'trial' || p.enabled !== false)
+                .map((p: any) => {
+                    const isTrial = p.planType === 'trial';
 
-            // Montar features como objetos { key, text }
-                const numericFeatures: { key: string; text: string }[] = [];
-                if (lim.items != null) numericFeatures.push({ key: 'items', text: `${Number(lim.items).toLocaleString('pt-BR')} Itens` });
-                if (lim.visionAi != null) numericFeatures.push({ key: 'visionAi', text: `${Number(lim.visionAi).toLocaleString('pt-BR')} Vision AI 🤖` });
-                if (lim.houses != null) numericFeatures.push({ key: 'houses', text: `${Number(lim.houses).toLocaleString('pt-BR')} Casas` });
-                if (lim.roomsPerHouse != null) numericFeatures.push({ key: 'roomsPerHouse', text: `${Number(lim.roomsPerHouse).toLocaleString('pt-BR')} Cômodos/casa` });
-                if (lim.furniturePerRoom != null) numericFeatures.push({ key: 'furniturePerRoom', text: `${Number(lim.furniturePerRoom).toLocaleString('pt-BR')} Móveis/cômodo` });
-                if (lim.photosPerItem != null) numericFeatures.push({ key: 'photosPerItem', text: `${Number(lim.photosPerItem).toLocaleString('pt-BR')} Fotos/item` });
-                if (lim.collaboratorsPerHouse != null) numericFeatures.push({ key: 'collaboratorsPerHouse', text: `${Number(lim.collaboratorsPerHouse).toLocaleString('pt-BR')} Colaboradores/casa` });
+                    // Converter features[] string[] → PricingFeature[]
+                    const features = (p.features || []).map((text: string, i: number) => ({
+                        key: `feat_${i}`,
+                        text,
+                    }));
 
-                const booleanFeatures: { key: string; text: string }[] = [];
-                if (lim.history) booleanFeatures.push({ key: 'history', text: 'Histórico de uso' });
-                if (lim.ranking) booleanFeatures.push({ key: 'ranking', text: 'Ranking (mais usados)' });
-                if (lim.importExcel) booleanFeatures.push({ key: 'importExcel', text: 'Importação (Excel)' });
-                if (lim.exportData) booleanFeatures.push({ key: 'exportData', text: 'Exportação de dados' });
-                if (lim.consolidation) booleanFeatures.push({ key: 'consolidation', text: 'Consolidação/Mudança' });
-                if (lim.aiAssistant) booleanFeatures.push({ key: 'aiAssistant', text: 'Assistente IA 🤖' });
-
-                // String-type features (always present, vary by plan)
-                if (lim.notifications) {
-                    const notifText = lim.notifications === 'full' ? 'Notificações completas' : 'Notificações básicas';
-                    booleanFeatures.push({ key: 'notifications', text: notifText });
-                }
-                if (lim.support) {
-                    const supportText = lim.support === 'priority' ? 'Suporte prioritário' : lim.support === 'email' ? 'Suporte e-mail' : 'Suporte comunidade';
-                    booleanFeatures.push({ key: 'support', text: supportText });
-                }
-
-                // Trial plan: todas as features incluídas, sem excluded
-                const isTrial = key === 'trial';
-                const excludedFeatures: { key: string; text: string }[] = [];
-                if (!isTrial) {
-                    if (!lim.history) excludedFeatures.push({ key: 'history', text: 'Histórico de uso' });
-                    if (!lim.ranking) excludedFeatures.push({ key: 'ranking', text: 'Ranking (mais usados)' });
-                    if (!lim.importExcel) excludedFeatures.push({ key: 'importExcel', text: 'Importação (Excel)' });
-                    if (!lim.exportData) excludedFeatures.push({ key: 'exportData', text: 'Exportação de dados' });
-                    if (!lim.consolidation) excludedFeatures.push({ key: 'consolidation', text: 'Consolidação/Mudança' });
-                    if (!lim.aiAssistant) excludedFeatures.push({ key: 'aiAssistant', text: 'Assistente IA 🤖' });
-                    // notifications and support are always included (never excluded — they have a value for every plan)
-                }
-
-                // Determine button text and link
-                let buttonText: string;
-                let buttonLink: string;
-                if (key === 'free') {
-                    buttonText = t('pricing.free.button');
-                    buttonLink = '/register';
-                } else if (isTrial) {
-                    buttonText = t('pricing.free.button'); // "Começar Grátis"
-                    buttonLink = '/register';
-                } else {
-                    buttonText = t('pricing.plus.button');
-                    buttonLink = `/register?plan=${key}`;
-                }
-
-                plans.push({
-                    name: plan.name || key.charAt(0).toUpperCase() + key.slice(1),
-                    price: isTrial ? t('pricing.trial_price') : (plan.price || (key === 'free' ? 'Grátis' : '')),
-                    description: isTrial ? t('pricing.trial_desc') : (plan.description || ''),
-                    features: [...numericFeatures, ...booleanFeatures],
-                    excludedFeatures: excludedFeatures.length > 0 ? excludedFeatures : undefined,
-                    isPopular: plan.isPopular || false,
-                    isTrial: isTrial,
-                    buttonText,
-                    buttonLink,
+                    return {
+                        name: p.name,
+                        price: isTrial ? t('pricing.trial_price') : p.price,
+                        description: isTrial ? t('pricing.trial_desc') : p.description,
+                        features,
+                        isPopular: p.isPopular || false,
+                        isTrial,
+                        buttonText: isTrial ? t('pricing.free.button') : (p.buttonText || ''),
+                        buttonLink: p.buttonLink || `/${locale}/register`,
+                        // Campo de herança automática (v0.7.3+)
+                        inheritance: p.inheritance || undefined,
+                    } as PricingParams;
                 });
-            }
         }
     } catch {
         // Silently fall through to i18n fallback
     }
 
     // Fallback: i18n (se API falhar ou retornar vazio)
-    // Para o fallback, usamos key genérica 'fallback' pois não temos keys individuais
     if (plans.length === 0) {
         const freeExcluded = (() => {
             try { return t.has('pricing.free.excluded') ? t('pricing.free.excluded').split(',') : []; }
@@ -187,7 +140,7 @@ async function fetchPricing(t: any): Promise<PricingParams[]> {
                 excludedFeatures: freeExcluded.map((text: string, i: number) => ({ key: `fallback_excl_${i}`, text: text.trim() })),
                 isPopular: false,
                 buttonText: t('pricing.free.button'),
-                buttonLink: '/register',
+                buttonLink: `/${locale}/register`,
             },
             {
                 name: t('pricing.plus.name'),
@@ -196,7 +149,7 @@ async function fetchPricing(t: any): Promise<PricingParams[]> {
                 features: toFeatures(t('pricing.plus.features')),
                 isPopular: true,
                 buttonText: t('pricing.plus.button'),
-                buttonLink: '/register?plan=plus',
+                buttonLink: `/${locale}/register?plan=plus`,
             },
             {
                 name: t('pricing.pro.name'),
@@ -205,21 +158,19 @@ async function fetchPricing(t: any): Promise<PricingParams[]> {
                 features: toFeatures(t('pricing.pro.features')),
                 isPopular: false,
                 buttonText: t('pricing.pro.button'),
-                buttonLink: '/register?plan=pro',
+                buttonLink: `/${locale}/register?plan=pro`,
             },
         ];
     }
 
     // Aplicar filtro de visibilidade (marketing)
     if (visibility) {
-        // Ocultar planos inteiros (case-insensitive: "free" matches "Free")
         plans = plans.filter(p =>
             !visibility.hiddenPlans.some(hp =>
                 hp.toLowerCase() === p.name.toLowerCase()
             )
         );
 
-        // Ocultar features individuais (agora usa feature.key diretamente!)
         plans = plans.map(p => {
             const hiddenKeys =
                 visibility.hiddenFeatures[p.name] ||
@@ -230,7 +181,7 @@ async function fetchPricing(t: any): Promise<PricingParams[]> {
 
             return {
                 ...p,
-                features: p.features.filter(f => !hiddenKeys.includes(f.key)),
+                features: p.features.filter((f: any) => !hiddenKeys.includes(f.key)),
             };
         });
     }
@@ -250,7 +201,7 @@ export default async function TrackaLandingPage() {
 
     const showFeatures = config.showFeatures !== false;
     const faqItems = config.faq?.length ? config.faq : t.raw('faq.items') || [];
-    const pricingItems = await fetchPricing(t);
+    const pricingItems = await fetchPricing(t, locale);
 
     const footerLinks = config.footerLinks?.length ? config.footerLinks : [
         { label: tc('footer.links.faq'), href: '/faq' },
@@ -332,6 +283,7 @@ export default async function TrackaLandingPage() {
                 navPricing={t('pricing.title')}
                 navAbout="Soluções RKM"
                 loginText={tc('login')}
+                locale={locale}
             />
 
             {/* ─── Hero ─── */}
@@ -343,6 +295,7 @@ export default async function TrackaLandingPage() {
                 badgeOriginal={t('hero.badge_original')}
                 ctaPrimary={config.ctaPrimaryText || t('hero.cta_primary')}
                 ctaSecondary={t('hero.cta_secondary')}
+                locale={locale}
             />
 
             {/* ─── Content Sections ─── */}
@@ -392,6 +345,7 @@ export default async function TrackaLandingPage() {
                         popularLabel={t('pricing.plus.popular')}
                         featureTooltips={config.featureTooltips}
                         trialNoCardText={t('pricing.trial_no_card')}
+                        inheritanceLabel={locale === 'en' ? 'Everything in {plan}, plus:' : 'Tudo do {plan}, mais:'}
                     />
                 )}
 
@@ -402,6 +356,7 @@ export default async function TrackaLandingPage() {
                         subtitle={config.footerCtaSubtitle || t('cta.subtitle')}
                         buttonText={config.footerCtaButton || t('cta.button')}
                         badgeText={t('cta.badge')}
+                        locale={locale}
                     />
 
                     {config.showFaq !== false && faqItems.length > 0 && (

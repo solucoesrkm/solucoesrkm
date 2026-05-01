@@ -12,9 +12,10 @@ interface CallToActionSectionProps {
     subtitle: string;
     buttonText: string;
     badgeText?: string;
+    locale?: string;
 }
 
-export function CallToActionSection({ title, subtitle, buttonText, badgeText }: CallToActionSectionProps) {
+export function CallToActionSection({ title, subtitle, buttonText, badgeText, locale = 'pt' }: CallToActionSectionProps) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
 
     return (
@@ -41,7 +42,7 @@ export function CallToActionSection({ title, subtitle, buttonText, badgeText }: 
             </div>
 
             <a
-                href={`${appUrl}/register`}
+                href={`${appUrl}/${locale}/register`}
                 className="group relative z-10 flex items-center gap-3 text-white text-lg font-bold px-10 py-5 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/30 hover:scale-105"
                 style={{ background: 'var(--landing-gradient-cta)' }}
             >
