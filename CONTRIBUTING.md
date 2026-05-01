@@ -23,6 +23,7 @@
 14. [Commits e Branches](#14-commits-e-branches)
 15. [Checklist pré-PR](#15-checklist-pré-pr)
 16. [Quickstart para Agentes de IA](#16-quickstart-para-agentes-de-ia)
+17. [Mapa de Documentação](#17-mapa-de-documentação)
 
 ---
 
@@ -526,10 +527,13 @@ error: failed to set up sandbox: sandboxing is not supported on Windows
 
 ### Antes de escrever qualquer código
 
-1. Ler `README.md` — entender stack e integração com Tracka
-2. Verificar `src/types/landing.types.ts` — tipos de PricingParams, PlanInheritance
-3. Verificar `src/application/admin/site-settings.actions.ts` — padrão de CRUD
-4. Checar `messages/pt.json` e `messages/en.json` — namespaces existentes
+1. Ler [`README.md`](README.md) — entender stack e integração com Tracka
+2. Ler [`docs/Architecture.md`](docs/Architecture.md) — diagramas de infra e fluxos
+3. Ler [`docs/Database.md`](docs/Database.md) — schema e chaves de SiteSettings
+4. Verificar [`src/types/landing.types.ts`] — tipos de PricingParams, PlanInheritance
+5. Verificar [`src/application/admin/site-settings.actions.ts`] — padrão de CRUD
+6. Verificar [`docs/Roles.md`](docs/Roles.md) — permissões necessárias para a feature
+7. Checar `messages/pt.json` e `messages/en.json` — namespaces existentes
 
 ### Invariantes que NUNCA devem quebrar
 
@@ -568,7 +572,28 @@ error: failed to set up sandbox: sandboxing is not supported on Windows
 
 ```
 1. Adicionar campo no schema Zod do form correspondente
-2. Atualizar o tipo em src/types/landing.types.ts (se necessário)
-3. Adicionar label/placeholder em messages/pt.json e messages/en.json
+2. Atualizar o tipo em `src/types/landing.types.ts` (se necessário)
+3. Adicionar label/placeholder em `messages/pt.json` e `messages/en.json`
 4. O diff e histórico são automáticos — não é necessário código extra
 ```
+
+---
+
+## 17. Mapa de Documentação
+
+| Documento | Finalidade | Quando consultar |
+|-----------|-----------|------------------|
+| [`README.md`](README.md) | Stack, setup, visão geral | Primeiro contato |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Este arquivo | **Sempre antes de modificar** |
+| [`CONCEPTS.md`](CONCEPTS.md) | Decisões técnicas (por que, não como) | Entender motivações arquiteturais |
+| [`SECURITY.md`](SECURITY.md) | Headers HTTP, JWT, roles, cron auth | Adicionar endpoints ou auditar |
+| [`VERCEL_GUIDE.md`](VERCEL_GUIDE.md) | Deploy, seed, troubleshooting | Deploy ou debugar produção |
+| [`CHANGELOG.md`](CHANGELOG.md) | Histórico de versões | Ao lançar nova versão |
+| [`docs/INDEX.md`](docs/INDEX.md) | Mapa de toda a documentação | Procurar onde está algo |
+| [`docs/Architecture.md`](docs/Architecture.md) | Diagramas Mermaid de infra e fluxos | Projetar features ou onboarding |
+| [`docs/Database.md`](docs/Database.md) | Schema Prisma, chaves de SiteSettings | Alterar schema ou entender persistência |
+| [`docs/API.md`](docs/API.md) | Todos os endpoints REST | Criar ou modificar endpoints |
+| [`docs/Roles.md`](docs/Roles.md) | Matriz de permissões, fluxo de auth | Verificar permissões |
+| [`docs/AdminGuide.md`](docs/AdminGuide.md) | Painel admin (visão técnica) | Modificar ou adicionar seção admin |
+| [`docs/UserManual.md`](docs/UserManual.md) | Painel admin (visão do usuário) | Treinar admins ou escrever testes E2E |
+| [`docs/StyleGuide.md`](docs/StyleGuide.md) | Design system, tokens CSS | Criar ou modificar componentes UI |

@@ -238,7 +238,26 @@ npm run build
 npx vercel --prod
 ```
 
-> Configuração de Cron, env vars e domínios: painel Vercel do projeto `solucoesrkm`.
+> Guia completo: [`VERCEL_GUIDE.md`](VERCEL_GUIDE.md) — env vars, seed de admin, cron, troubleshooting.
+
+---
+
+## Documentação
+
+| Arquivo | Finalidade |
+|---------|-----------|
+| [docs/INDEX.md](docs/INDEX.md) | **Mapa completo** de toda a documentação |
+| [docs/Architecture.md](docs/Architecture.md) | Diagramas de infra, auth, SiteSettings, planos |
+| [docs/Database.md](docs/Database.md) | Schema Prisma, chaves de SiteSettings |
+| [docs/API.md](docs/API.md) | Referência de todos os endpoints REST |
+| [docs/Roles.md](docs/Roles.md) | Papéis e permissões do admin |
+| [docs/AdminGuide.md](docs/AdminGuide.md) | Guia técnico do painel admin |
+| [docs/UserManual.md](docs/UserManual.md) | Manual para admins não-técnicos |
+| [docs/StyleGuide.md](docs/StyleGuide.md) | Design system, tokens CSS |
+| [SECURITY.md](SECURITY.md) | Headers HTTP, JWT, proteções |
+| [CONCEPTS.md](CONCEPTS.md) | Decisões técnicas e seus motivos |
+| [VERCEL_GUIDE.md](VERCEL_GUIDE.md) | Deploy na Vercel |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Guia para devs e agentes de IA |
 
 ---
 
@@ -248,9 +267,9 @@ npx vercel --prod
 solucoesrkm.com          tracka.solucoesrkm.com
 (este repo)              (Controle das Coisas/)
      │                           │
-     └──── Turso DB ─────────────┘  ← banco compartilhado
+     └──── Turso DB ─────────────┘  ← banco SEPARADO (não compartilhado)
      │                           │
-     └──── /api/public/plans ────┘  ← pricing sync via API
+     └──── /api/public/plans ────┘  ← pricing sync via API REST
 ```
 
 Alterações de planos/features feitas no admin do **Tracka** refletem automaticamente neste site via cache de 60s.
