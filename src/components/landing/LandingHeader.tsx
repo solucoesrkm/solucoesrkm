@@ -11,6 +11,7 @@
 
 import { Link } from '@/i18n/navigation';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { TRACKA_APP_URL } from '@/config/app.config';
 import { ReactNode } from 'react';
 
 interface LandingHeaderProps {
@@ -24,7 +25,7 @@ interface LandingHeaderProps {
 }
 
 export function LandingHeader({ logoText, navHome, navFeatures, navPricing, navAbout, loginText, locale = 'pt' }: LandingHeaderProps) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
+    const appUrl = TRACKA_APP_URL;
 
     return (
         <header className="fixed top-0 w-full z-50 px-4 py-3 md:px-12 transition-all duration-300" style={{

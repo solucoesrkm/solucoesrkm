@@ -1,0 +1,15 @@
+/**
+ * @file app.config.ts
+ * @description Constantes centralizadas de URLs do ecossistema.
+ *
+ * REGRA: nunca hardcodar URLs de app em componentes.
+ * Sempre importar daqui para facilitar troca de domínio.
+ */
+
+/** URL do app Tracka (tracka.solucoesrkm.com) */
+export const TRACKA_APP_URL =
+    process.env.NEXT_PUBLIC_APP_URL ?? 'https://tracka.solucoesrkm.com';
+
+/** URL desta landing page (solucoesrkm.com) */
+export const LANDING_URL =
+    process.env.NEXT_PUBLIC_LANDING_URL ?? 'https://solucoesrkm.com';

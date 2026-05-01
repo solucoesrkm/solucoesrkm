@@ -132,7 +132,7 @@ Configurado em `vercel.json`:
 }
 ```
 
-Executa diariamente às 06:00 UTC.
+Executa diariamente às **03:30 UTC**.
 
 ---
 

@@ -13,6 +13,7 @@
 import { useState, useEffect } from 'react';
 import { Check, X, Crown, Sparkles, Info, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { TRACKA_APP_URL } from '@/config/app.config';
 import type { PricingParams, PricingFeature } from '@/types';
 import { detectCurrency, fetchExchangeRate, convertFromBRL, getCacheKey, type CurrencyInfo } from '@/lib/currency-utils';
 
@@ -101,7 +102,7 @@ export function PricingSection({
 
     if (!items || items.length === 0) return null;
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
+    const appUrl = TRACKA_APP_URL;
 
     const getPlanKey = (name: string) => {
         const lower = name.toLowerCase();
@@ -207,13 +208,13 @@ export function PricingSection({
                                 {isTrial && (
                                     <>
                                         <div className="absolute -inset-px rounded-2xl pointer-events-none" style={{
-                                            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), transparent)',
+                                            background: 'var(--landing-trial-overlay)',
                                             filter: 'blur(1px)',
                                             zIndex: 0,
                                         }} />
                                         <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-3 z-10">
                                             <span className="flex items-center gap-1.5 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wide shadow-lg"
-                                                style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
+                                                style={{ background: 'var(--landing-gradient-trial)' }}>
                                                 <Clock className="w-3.5 h-3.5" />
                                                 14 {locale === 'en' ? 'DAYS' : 'DIAS'}
                                             </span>
@@ -290,7 +291,7 @@ export function PricingSection({
                                 {/* Divider */}
                                 <div className="relative z-10 border-t border-white/10 pt-6 mb-2">
                                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                                        {includedLabel || "What's included"}
+                                        {includedLabel || (locale === 'en' ? "What's included" : 'O que está incluído')}
                                     </p>
                                 </div>
 
@@ -323,7 +324,7 @@ export function PricingSection({
                                                             {f.label}
                                                             <Info className="w-3 h-3 text-gray-600 group-hover:text-indigo-400 transition-colors shrink-0" />
                                                             <span className="absolute bottom-full left-0 mb-2 w-60 p-2.5 rounded-lg text-xs text-gray-200 leading-relaxed invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 pointer-events-none" style={{
-                                                                background: 'rgba(15, 15, 30, 0.95)',
+                                                                background: 'var(--color-bg-elevated)',
                                                                 border: '1px solid var(--color-glass-border-strong)',
                                                                 backdropFilter: 'blur(8px)',
                                                             }}>

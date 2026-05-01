@@ -8,10 +8,11 @@
 
 import { Search, Box, Smartphone, Lock, Zap, Star } from 'lucide-react';
 import { FeatureRow, FeatureCard } from './SharedLandingComponents';
+import type { ReactNode } from 'react';
 import type { FeatureItem } from '@/types';
 
 // ─── Icon Mapping (para features dinâmicas do admin) ────────────────
-const ICON_MAP: Record<string, React.ReactNode> = {
+const ICON_MAP: Record<string, ReactNode> = {
     search: <Search className="w-10 h-10 text-blue-400" />,
     box: <Box className="w-10 h-10 text-amber-600" />,
     smartphone: <Smartphone className="w-10 h-10 text-green-400" />,
@@ -19,7 +20,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
     star: <Star className="w-10 h-10 text-yellow-400" />,
 };
 
-function getIconForFeature(icon?: string): React.ReactNode {
+function getIconForFeature(icon?: string): ReactNode {
     if (icon && ICON_MAP[icon.toLowerCase()]) return ICON_MAP[icon.toLowerCase()];
     return <Star className="w-10 h-10 text-indigo-400" />;
 }

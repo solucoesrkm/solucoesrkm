@@ -108,6 +108,10 @@
   --landing-disclaimer-bg: rgba(245, 158, 11, 0.08);
   --landing-disclaimer-border: rgba(245, 158, 11, 0.2);
   --landing-grid-line: rgba(255, 255, 255, 0.1);
+
+  /* ─── Trial ─── */
+  --landing-gradient-trial: linear-gradient(135deg, #f59e0b, #d97706);
+  --landing-trial-overlay: linear-gradient(135deg, rgba(245, 158, 11, 0.15), transparent);
 }
 
 /* ═══ Landing Utility Classes ═══ */

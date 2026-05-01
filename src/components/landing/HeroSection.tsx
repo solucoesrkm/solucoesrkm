@@ -7,6 +7,7 @@
  */
 
 import { Sparkles, ArrowRight } from 'lucide-react';
+import { TRACKA_APP_URL } from '@/config/app.config';
 
 interface HeroSectionProps {
     title: string;
@@ -20,7 +21,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ title, subtitle, image, badgeNew, badgeOriginal, ctaPrimary, ctaSecondary, locale = 'pt' }: HeroSectionProps) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
+    const appUrl = TRACKA_APP_URL;
 
     return (
         <section className="relative w-full flex items-center justify-start px-4 md:px-12 pt-24 pb-48 md:min-h-[90vh]" style={{ minHeight: 'max(80vh, 560px)' }}>

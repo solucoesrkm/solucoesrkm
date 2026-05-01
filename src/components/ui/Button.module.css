@@ -23,7 +23,7 @@
 
 /* ─── Variants ─── */
 .primary {
-    background-color: rgb(79, 70, 229);
+    background-color: var(--color-brand-primary);
     color: white;
 }
 
