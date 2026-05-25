@@ -153,9 +153,9 @@
       "readonly": "Leitura"
     },
     "breadcrumb": {
-      "home": "Home",
+      "home": "Início",
       "admin": "Admin",
-      "settings": "Settings"
+      "settings": "Configurações"
     },
     "settings": {
       "title": "Configurações",
@@ -328,6 +328,10 @@
       "field": "Campo",
       "before": "Antes",
       "after": "Depois"
+    },
+    "freshdeskSync": {
+      "title": "Freshdesk KB — Sync Corporativo",
+      "subtitle": "Sincronize FAQ, Termos, Privacidade, Legal e Cookies com a Knowledge Base."
     }
   }
 }

@@ -10,7 +10,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
@@ -18,7 +18,11 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.c
 export default function AdminLoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname();
     const callbackUrl = searchParams.get('callbackUrl') || '/admin/settings';
+
+    // Detect locale from the URL path (e.g. /en/admin/login → 'en')
+    const locale = pathname?.split('/')?.[1] || 'pt';
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -248,7 +252,7 @@ export default function AdminLoginPage() {
                             </label>
 
                             <a
-                                href={`${APP_URL}/pt/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
+                                href={`${APP_URL}/${locale}/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
                                 style={{
                                     fontSize: '0.9rem',
                                     color: '#287D8B',
@@ -321,7 +325,7 @@ export default function AdminLoginPage() {
                                 Ainda não possui conta?
                             </p>
                             <a
-                                href={`${APP_URL}/pt/register`}
+                                href={`${APP_URL}/${locale}/register`}
                                 style={{
                                     display: 'block',
                                     width: '100%',

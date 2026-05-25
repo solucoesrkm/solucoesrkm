@@ -259,7 +259,9 @@ export function PricingSection({
                                                 <span className={`text-4xl font-bold ${isTrial ? '' : ''} ${plan.isPopular ? 'landing-text-gradient' : ''}`}
                                                     style={isTrial ? { background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' } : undefined}
                                                 >{plan.price}</span>
-                                                {!isTrial && plan.price !== 'Grátis' && plan.price !== 'Free' && !plan.price.includes('/') && <span className="text-gray-500">/mês</span>}
+                                                {!isTrial && plan.price !== 'Grátis' && plan.price !== 'Free' && !plan.price.includes('/') && (
+                                                    <span className="text-gray-500">{locale === 'en' ? '/mo' : '/mês'}</span>
+                                                )}
                                             </>
                                         )}
                                     </div>

@@ -21,6 +21,9 @@ const envSchema = z.object({
         .min(1, 'DATABASE_URL não pode ser vazio'),
     TURSO_AUTH_TOKEN: z.string().optional(),
 
+    // Freshdesk (optional)
+    FRESHDESK_DOMAIN: z.string().optional(),
+
     // Auth
     JWT_SECRET: z
         .string({ message: 'JWT_SECRET é obrigatório. Gere com: openssl rand -hex 32' })

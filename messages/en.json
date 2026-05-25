@@ -105,8 +105,6 @@
       "plus": {
         "name": "Plus",
         "price": "R$ 9,90",
-        "priceMonthly": "/mo",
-        "priceBrl": 9.9,
         "desc": "For those who need more space and resources.",
         "features": "200 Items,200 Vision AI 🤖,3 Houses,15 Rooms/house,15 Furniture/room,1 Photos/item,2 Collaborators/house,Usage history,Ranking (most used),Import (Excel),Data export,Consolidation/Moving,Full notifications,Email support",
         "button": "Subscribe Now",
@@ -115,8 +113,6 @@
       "pro": {
         "name": "Pro",
         "price": "R$ 19,90",
-        "priceMonthly": "/mo",
-        "priceBrl": 19.9,
         "desc": "For those who need the most out of Tracka.",
         "features": "2000 Items,2000 Vision AI 🤖,10 Houses,50 Rooms/house,50 Furniture/room,1 Photos/item,10 Collaborators/house,Usage history,Ranking (most used),Import (Excel),Data export,Consolidation/Moving,AI Assistant 🤖,Full notifications,Priority support",
         "button": "Subscribe Now"
@@ -332,6 +328,10 @@
       "field": "Field",
       "before": "Before",
       "after": "After"
+    },
+    "freshdeskSync": {
+      "title": "Freshdesk KB — Corporate Sync",
+      "subtitle": "Publish FAQ, Terms, Privacy, Legal and Cookies topics to the Freshdesk Knowledge Base."
     }
   }
 }

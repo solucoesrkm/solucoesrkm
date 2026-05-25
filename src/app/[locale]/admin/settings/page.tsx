@@ -83,7 +83,7 @@ export default async function AdminSettingsPage() {
                         </div>
                         <div className="hidden sm:block h-6 w-px bg-gray-200 dark:bg-white/10" />
                         <Breadcrumb items={[
-                            { label: 'Configurações' },
+                            { label: ta('breadcrumb.settings') },
                         ]} />
                     </div>
                     <div className="flex items-center gap-2">
@@ -211,8 +211,8 @@ export default async function AdminSettingsPage() {
                 {/* Freshdesk KB Sync — Corporativo */}
                 {(role === 'SUPERADMIN' || role === 'ADMIN') && (
                     <CollapsibleSection
-                        title="Freshdesk KB — Sync Corporativo"
-                        subtitle="Sincronize FAQ, Termos, Privacidade, Legal e Cookies com a Knowledge Base."
+                        title={ta('freshdeskSync.title')}
+                        subtitle={ta('freshdeskSync.subtitle')}
                         icon={<RefreshCw className="w-4 h-4 text-white" />}
                         iconBg="bg-gradient-to-br from-emerald-500 to-teal-600"
                         defaultOpen={false}

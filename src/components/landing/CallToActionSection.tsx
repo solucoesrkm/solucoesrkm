@@ -6,6 +6,7 @@
  */
 
 import { ChevronRight, Sparkles } from 'lucide-react';
+import { TRACKA_APP_URL } from '@/config/app.config';
 
 interface CallToActionSectionProps {
     title: string;
@@ -16,7 +17,7 @@ interface CallToActionSectionProps {
 }
 
 export function CallToActionSection({ title, subtitle, buttonText, badgeText, locale = 'pt' }: CallToActionSectionProps) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
+    const appUrl = TRACKA_APP_URL;
 
     return (
         <section className="relative overflow-hidden w-full rounded-2xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10" style={{

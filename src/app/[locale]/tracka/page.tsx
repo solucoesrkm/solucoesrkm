@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function TrackaPage({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
     const t = await getTranslations('tracka');
     const tc = await getTranslations('corporate');
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
@@ -63,6 +64,7 @@ export default async function TrackaPage({ params }: { params: Promise<{ locale:
                 navPricing={t('pricing.title')}
                 navAbout={tc('brand')}
                 loginText={tc('login')}
+                locale={locale}
             />
 
             {/* Hero */}
@@ -80,7 +82,7 @@ export default async function TrackaPage({ params }: { params: Promise<{ locale:
                     }}>Tracka</h1>
                     <p className="text-lg md:text-2xl text-gray-200 max-w-xl leading-relaxed font-light">{t('hero.subtitle')}</p>
                     <div className="flex flex-wrap gap-4 pt-2">
-                        <a href={`${appUrl}/register`} className="flex items-center gap-3 bg-white text-black px-8 py-3 rounded-md font-bold text-lg hover:bg-gray-200 transition-colors transform hover:scale-105 duration-200">
+                        <a href={`${appUrl}/${locale}/register`} className="flex items-center gap-3 bg-white text-black px-8 py-3 rounded-md font-bold text-lg hover:bg-gray-200 transition-colors transform hover:scale-105 duration-200">
                             <Play className="fill-black" size={24} />{t('hero.cta_primary')}
                         </a>
                         <a href="#features" className="flex items-center gap-3 bg-gray-600/60 text-white px-8 py-3 rounded-md font-bold text-lg hover:bg-gray-600/80 transition-colors backdrop-blur-md">
@@ -140,7 +142,7 @@ export default async function TrackaPage({ params }: { params: Promise<{ locale:
                                         </li>
                                     ))}
                                 </ul>
-                                <a href={`${appUrl}/register`} className={`block text-center py-2.5 rounded-lg font-semibold text-sm transition-colors ${plan.popular ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-white/10 hover:bg-white/15 text-gray-300'}`}>
+                                <a href={`${appUrl}/${locale}/register`} className={`block text-center py-2.5 rounded-lg font-semibold text-sm transition-colors ${plan.popular ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-white/10 hover:bg-white/15 text-gray-300'}`}>
                                     {plan.button}
                                 </a>
                             </div>
@@ -168,7 +170,7 @@ export default async function TrackaPage({ params }: { params: Promise<{ locale:
                 <section className="text-center space-y-4 py-12">
                     <h2 className="text-3xl font-bold">{t('cta.title')}</h2>
                     <p className="text-gray-400 max-w-lg mx-auto">{t('cta.subtitle')}</p>
-                    <a href={`${appUrl}/register`} className="inline-block bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-10 py-3.5 rounded-lg font-bold text-lg transition-all hover:scale-105">
+                    <a href={`${appUrl}/${locale}/register`} className="inline-block bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white px-10 py-3.5 rounded-lg font-bold text-lg transition-all hover:scale-105">
                         {t('cta.button')}
                     </a>
                 </section>
