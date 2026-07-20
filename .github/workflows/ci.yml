@@ -77,6 +77,9 @@ jobs:
       - name: 🏗️ Build
         run: npx next build
         env:
-          # Variáveis mínimas para o build passar
+          # Variáveis mínimas para o build passar (valores descartáveis, apenas
+          # para satisfazer a validação de env em build-time — NÃO são segredos reais)
           DATABASE_URL: "file:./dev.db"
+          JWT_SECRET: "ci-build-only-dummy-secret-nao-usado-em-runtime"
           NEXT_PUBLIC_APP_URL: "https://tracka.solucoesrkm.com"
+          NEXT_PUBLIC_SITE_URL: "https://solucoesrkm.com"
