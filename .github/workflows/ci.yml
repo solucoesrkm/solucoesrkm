@@ -66,10 +66,10 @@ jobs:
         run: npx tsc --noEmit
 
       # ── 5. Lint ──
-      # Verifica padrões de código usando ESLint do Next.js
-      # Pega problemas como: imports não usados, regras de React, acessibilidade
+      # Verifica padrões de código com ESLint (flat config, eslint-config-next)
+      # `next lint` foi removido no Next 16 — usamos o ESLint CLI via script npm
       - name: 🧹 Lint
-        run: npx next lint
+        run: npm run lint
 
       # ── 6. Build ──
       # Tenta compilar o projeto inteiro como faz o Vercel
