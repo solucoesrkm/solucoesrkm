@@ -14,7 +14,7 @@ export function MarkdownRenderer({ content }: { content: string }) {
         let inOl = false;
 
         for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
+            const line = lines[i];
 
             // Headings
             if (line.startsWith('### ')) {
