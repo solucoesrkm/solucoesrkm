@@ -25,7 +25,7 @@ Configure em **Vercel → Project → Settings → Environment Variables**:
 | `NEXT_PUBLIC_LANDING_URL` | ✅ | `https://solucoesrkm.com` |
 | `JWT_SECRET` | ✅ | Mínimo 32 chars — `openssl rand -base64 32` |
 | `TRACKA_API_URL` | ✅ | `https://tracka.solucoesrkm.com` |
-| `TRACKA_LANDING_API_KEY` | ✅ | Gerada no admin do Tracka → API Keys |
+| `TRACKA_LANDING_API_KEY` | ✅ | Gerada no admin do Tracka → API Keys. Enviada no header `x-api-key` p/ buscar os planos. Ver **§10** para o que a API faz e o passo a passo. |
 | `FRESHDESK_API_KEY` | ⚪ | Necessária para sync com Freshdesk |
 | `CRON_SECRET` | ⚪ | Protege o endpoint `/api/cron/freshdesk-sync` |
 
@@ -163,9 +163,10 @@ npx tsc --noEmit
 
 ### Planos não aparecem na landing
 
-1. Verificar se `TRACKA_API_URL` está correto
-2. Verificar se `TRACKA_LANDING_API_KEY` foi gerada e está ativa no admin do Tracka
+1. Verificar se `TRACKA_API_URL` / `NEXT_PUBLIC_APP_URL` estão corretos
+2. Verificar se `TRACKA_LANDING_API_KEY` (Vercel) == chave salva no admin do Tracka
 3. Testar manualmente: `curl https://tracka.solucoesrkm.com/api/public/plans -H "x-api-key: SEU_KEY"`
+4. Detalhes completos da integração (o que a API lê/escreve, variáveis, provisionamento): ver **§10**
 
 ### Widget Freshdesk não aparece
 
@@ -190,3 +191,94 @@ Em caso de problema após deploy:
 3. Clicar **Promote to Production**
 
 Rollback é instantâneo — sem impacto no banco.
+
+---
+
+## 10. Integração de Pricing — `TRACKA_LANDING_API_KEY`
+
+Esta seção documenta **como a landing obtém os planos/preços do Tracka**, o que a
+API faz (o que lê e escreve), os tipos de acesso e todas as variáveis envolvidas.
+
+### 10.1. O que a integração faz
+
+A fonte de verdade dos planos é o **admin do Tracka** (app `controle-das-coisas`).
+A landing **não** tem preços próprios: ela consome a API pública do Tracka e reflete
+automaticamente o que o admin configurar (limites, preços, quais planos estão ativos).
+
+```
+Landing (solucoesrkm)                    App Tracka (controle-das-coisas)
+  fetchPricing() em page.tsx  ──GET──▶   /api/public/plans
+  header: x-api-key                       valida x-api-key → lê plan_config → responde
+     (= TRACKA_LANDING_API_KEY)           (nunca escreve nada)
+```
+
+Se a chave estiver ausente/errada, o app responde **401** e a landing usa o
+**fallback i18n** (`messages/pt.json` / `en.json`) — que pode ficar desatualizado.
+Por isso a chave é **obrigatória** para o pricing refletir a fonte de verdade.
+
+### 10.2. O que a API lê e escreve (tipos de acesso)
+
+Todos os endpoints públicos são **somente leitura** (`GET`) e **não escrevem nada**.
+A escrita acontece só no admin do Tracka, por um endpoint **separado e autenticado por sessão**.
+
+| Endpoint (app Tracka) | Método | Auth | Lê | Escreve |
+|---|---|---|---|---|
+| `/api/public/plans` | GET | `x-api-key` | `plan_config` (planos) + `landing_api_key` (p/ validar) | — (nada) |
+| `/api/public/landing-config` | GET | `x-api-key` | config da landing (hero/FAQ/toggles) + `plan_config` se `showPricing` | — (nada) |
+| `/api/admin/api-keys` | PUT | Sessão + role `SUPERADMIN`/`ADMIN`/`EDITOR` | chaves atuais | **grava** `landing_api_key` (encriptada) em `SiteSettings` |
+
+- **Leitura dos planos:** `getPlansConfig()` faz merge de `DEFAULT_PLAN_LIMITS` (código)
+  com `SiteSettings.plan_config` (banco), via `unstable_cache` (TTL 60s, tag
+  `plans-config`). Quando o admin salva, `revalidateTag('plans-config')` invalida o cache.
+- **Validação da chave:** `validateLandingApiKey()` lê o header `x-api-key`, busca
+  `SiteSettings.landing_api_key`, **decripta** (AES-256-GCM) e compara com timing-safe.
+- **Gravação da chave:** o card *Integrações / API Keys* do admin chama `PUT /api/admin/api-keys`,
+  que **encripta** a chave e faz `upsert` em `SiteSettings.landing_api_key`. É o **único**
+  ponto de escrita — nenhum endpoint público escreve.
+
+### 10.3. Variáveis envolvidas
+
+**Landing (`solucoesrkm` — env do Vercel):**
+
+| Variável | Papel |
+|---|---|
+| `TRACKA_LANDING_API_KEY` | **A chave.** Enviada no header `x-api-key` ao chamar `/api/public/plans`. **Server-only** (nunca prefixar com `NEXT_PUBLIC_`). Lida em `src/app/[locale]/page.tsx` (`fetchPricing`). |
+| `NEXT_PUBLIC_APP_URL` | Base URL do app Tracka usada no fetch dos planos (default `https://tracka.solucoesrkm.com`). |
+| `TRACKA_API_URL` | Mesma base do app (usada por outros pontos de integração). |
+
+**App Tracka (`controle-das-coisas` — env do Vercel do app):**
+
+| Variável / chave | Papel |
+|---|---|
+| `ENCRYPTION_KEY` | Hex de 64 chars (AES-256-GCM). Encripta/decripta a `landing_api_key`. **Obrigatória em produção** (o boot falha sem ela). |
+| `SiteSettings.plan_config` | *(no banco, não env)* Config de planos = **fonte de verdade**, editada no admin. |
+| `SiteSettings.landing_api_key` | *(no banco, não env)* A chave encriptada usada para validar os chamadores externos. |
+
+> A `TRACKA_LANDING_API_KEY` (Vercel da landing) e a `SiteSettings.landing_api_key`
+> (banco do app) precisam ter **o mesmo valor em texto puro**. O admin grava a versão
+> encriptada; você cola o texto puro no Vercel.
+
+### 10.4. Provisionamento (passo a passo)
+
+1. **Admin do Tracka** — `tracka.solucoesrkm.com/pt/admin/settings` → card
+   **Integrações / API Keys** → campo **🔑 Landing Page API Key** → **Gerar** →
+   revele (👁️) e **copie** a chave → **Salvar** (o *Gerar* só preenche o input; quem
+   grava no banco é o *Salvar*).
+2. **Vercel da landing** (`solucoesrkm`) → **Settings → Environment Variables** →
+   **Add New**:
+   - **Key:** `TRACKA_LANDING_API_KEY`
+   - **Value:** *(cole a MESMA chave da etapa 1)*
+   - **Environments:** Production (e Preview, se usar)
+3. **Redeploy** da landing (env nova só entra em vigor num novo deploy — o merge do
+   PR já dispara).
+
+### 10.5. Validação
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" \
+  -H "x-api-key: SUA_CHAVE" \
+  "https://tracka.solucoesrkm.com/api/public/plans?locale=pt"
+```
+
+- **200** → integração ativa; a landing reflete a fonte de verdade.
+- **401** → chave do Vercel ≠ chave salva no admin, ou o *Salvar* do admin não persistiu.
