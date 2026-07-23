@@ -98,23 +98,23 @@
         "name": "Free",
         "price": "Free",
         "desc": "For personal use and small organizations.",
-        "features": "50 Items,50 Vision AI 🤖,1 House,5 Rooms/house,5 Furniture/room,1 Photos/item,0 Collaborators/house,Basic notifications,Community support",
+        "features": "50 Items,50 Vision AI 📸,1 House,5 Rooms/house,5 Furniture/room,1 Photos/item,0 Collaborators/house,Basic notifications,Community support",
         "excluded": "Usage history,Ranking (most used),Import (Excel),Data export,Consolidation/Moving,AI Assistant 🤖",
         "button": "Start Free"
       },
       "plus": {
         "name": "Plus",
-        "price": "R$ 9,90",
+        "price": "$ 1.99",
         "desc": "For those who need more space and resources.",
-        "features": "200 Items,200 Vision AI 🤖,3 Houses,15 Rooms/house,15 Furniture/room,1 Photos/item,2 Collaborators/house,Usage history,Ranking (most used),Import (Excel),Data export,Consolidation/Moving,Full notifications,Email support",
+        "features": "200 Items,600 Vision AI 📸,3 Houses,15 Rooms/house,15 Furniture/room,3 Photos/item,2 Collaborators/house,Usage history,Ranking (most used),Import (Excel),Data export,Consolidation/Moving,Full notifications,Email support",
         "button": "Subscribe Now",
         "popular": "POPULAR"
       },
       "pro": {
         "name": "Pro",
-        "price": "R$ 19,90",
+        "price": "$ 3.99",
         "desc": "For those who need the most out of Tracka.",
-        "features": "2000 Items,2000 Vision AI 🤖,10 Houses,50 Rooms/house,50 Furniture/room,1 Photos/item,10 Collaborators/house,Usage history,Ranking (most used),Import (Excel),Data export,Consolidation/Moving,AI Assistant 🤖,Full notifications,Priority support",
+        "features": "2000 Items,10000 Vision AI 📸,10 Houses,50 Rooms/house,50 Furniture/room,5 Photos/item,10 Collaborators/house,Usage history,Ranking (most used),Import (Excel),Data export,Consolidation/Moving,AI Assistant 🤖,Full notifications,Priority support",
         "button": "Subscribe Now"
       }
     },

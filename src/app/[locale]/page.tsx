@@ -79,13 +79,24 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 async function fetchPricing(t: any, locale: string): Promise<PricingParams[]> {
     noStore(); // Sempre buscar dados frescos do banco
     const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://tracka.solucoesrkm.com';
+    // Server-only (NÃO prefixar com NEXT_PUBLIC_): key para o endpoint /api/public/plans do Tracka.
+    // Nome documentado em VERCEL_GUIDE.md. Sem ela o app responde 401 e a landing cai
+    // no fallback i18n (pricing dessincronizado da fonte de verdade / admin do Tracka).
+    const LANDING_API_KEY = process.env.TRACKA_LANDING_API_KEY;
     const visibility: PricingVisibility | null = await getSiteSettings('pricing_visibility');
 
-    // Tenta buscar da API pública do Tracka (retorna inheritance pronto)
+    if (!LANDING_API_KEY) {
+        console.warn('[fetchPricing] TRACKA_LANDING_API_KEY ausente — usando fallback i18n (pricing pode estar desatualizado). Configure a env no Vercel.');
+    }
+
+    // Tenta buscar da API pública do Tracka (retorna inheritance pronto).
+    // A fonte de verdade é o admin do Tracka (plan_config); esta chamada reflete
+    // automaticamente os limites/preços e já filtra planos com enabled=false.
     let plans: PricingParams[] = [];
     try {
         const res = await fetch(`${APP_URL}/api/public/plans?locale=${locale}`, {
             cache: 'no-store',
+            headers: LANDING_API_KEY ? { 'x-api-key': LANDING_API_KEY } : undefined,
         });
         if (res.ok) {
             const data = await res.json();
