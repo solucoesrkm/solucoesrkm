@@ -20,13 +20,14 @@ Configure em **Vercel → Project → Settings → Environment Variables**:
 | Variável | Obrigatório | Descrição |
 |----------|-------------|-----------|
 | `DATABASE_URL` | ✅ | `libsql://seu-db.turso.io` |
-| `DATABASE_AUTH_TOKEN` | ✅ | Token de autenticação Turso |
+| `TURSO_AUTH_TOKEN` | ✅ | Token de autenticação Turso |
 | `NEXT_PUBLIC_APP_URL` | ✅ | `https://tracka.solucoesrkm.com` |
-| `NEXT_PUBLIC_LANDING_URL` | ✅ | `https://solucoesrkm.com` |
+| `NEXT_PUBLIC_SITE_URL` | ✅ | `https://solucoesrkm.com` (URL da própria landing; usada em SEO/canonical) |
 | `JWT_SECRET` | ✅ | Mínimo 32 chars — `openssl rand -base64 32` |
 | `TRACKA_API_URL` | ✅ | `https://tracka.solucoesrkm.com` |
 | `TRACKA_LANDING_API_KEY` | ✅ | Gerada no admin do Tracka → API Keys. Enviada no header `x-api-key` p/ buscar os planos. Ver **§10** para o que a API faz e o passo a passo. |
 | `FRESHDESK_API_KEY` | ⚪ | Necessária para sync com Freshdesk |
+| `FRESHDESK_DOMAIN` | ⚪ | Domínio da conta Freshdesk (usado no sync) |
 | `CRON_SECRET` | ⚪ | Protege o endpoint `/api/cron/freshdesk-sync` |
 
 > ⚠️ `JWT_SECRET` deve ser diferente entre `staging` e `production` para evitar conflito de sessões.
