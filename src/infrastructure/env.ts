@@ -29,6 +29,17 @@ const envSchema = z.object({
         .string({ message: 'JWT_SECRET é obrigatório. Gere com: openssl rand -hex 32' })
         .min(16, 'JWT_SECRET deve ter pelo menos 16 caracteres'),
 
+    // Criptografia de PII — DEVE ser a MESMA chave do Tracka (tabela User compartilhada).
+    // Opcional no schema para não travar dev/test; crypto.ts faz fail-fast em produção.
+    ENCRYPTION_KEY: z
+        .string()
+        .length(64, 'ENCRYPTION_KEY deve ter 64 caracteres hex (32 bytes) — a MESMA do Tracka')
+        .optional(),
+
+    // Domínio do cookie de sessão. Em prod = solucoesrkm.com (SSO com tracka.solucoesrkm.com).
+    // Dev: deixe indefinido (cookie host-only em localhost).
+    COOKIE_DOMAIN: z.string().optional(),
+
     // URLs
     NEXT_PUBLIC_APP_URL: z
         .string()

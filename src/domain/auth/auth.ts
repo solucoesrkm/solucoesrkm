@@ -20,6 +20,14 @@ import { USER_ROLES, EMPLOYEE_ROLES, EDITABLE_ROLES } from '@/constants';
 // ─── Segredo JWT (validado pelo Zod em env.ts) ───────────────────
 const key = new TextEncoder().encode(env.JWT_SECRET);
 
+/**
+ * Domínio do cookie de sessão. Em produção, COOKIE_DOMAIN=solucoesrkm.com faz o
+ * cookie ser compartilhado entre o painel (solucoesrkm.com) e o app
+ * (tracka.solucoesrkm.com) — habilita SSO. Requer o MESMO JWT_SECRET nos dois.
+ * Dev: indefinido → cookie host-only em localhost.
+ */
+const COOKIE_DOMAIN = env.COOKIE_DOMAIN || undefined;
+
 // ─── Re-export de tipos (backward compatibility) ─────────────────
 export type { SessionPayload, SystemRole } from '@/types';
 
@@ -66,13 +74,15 @@ export async function setSession(payload: SessionPayload, remember = false): Pro
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
+        domain: COOKIE_DOMAIN,
         maxAge,
         path: '/',
     });
 }
 
 export async function clearSession(): Promise<void> {
-    (await cookies()).delete('session');
+    // Mesmo domain usado ao criar, senão o cookie compartilhado não é removido.
+    (await cookies()).delete({ name: 'session', domain: COOKIE_DOMAIN, path: '/' });
 }
 
 // ─── System Role ──────────────────────────────────────────────────
@@ -90,9 +100,12 @@ export async function getSystemRole(userId: string): Promise<SystemRole | null> 
 
     try {
         // 1. Check SUPERADMIN
+        // Usa emailDomain (em claro) — o email em si é AES-256-GCM (cifrado), então
+        // endsWith('@...') sobre user.email NÃO funcionaria. emailDomain é gravado
+        // em texto plano pelo Tracka justamente para checagens não-sensíveis como esta.
         const user = await prisma.user.findUnique({
             where: { id: userId },
-            select: { role: true, email: true },
+            select: { role: true, emailDomain: true },
         });
         if (!user) return null;
         if (user.role === USER_ROLES.SUPERADMIN) return 'SUPERADMIN';
@@ -104,8 +117,9 @@ export async function getSystemRole(userId: string): Promise<SystemRole | null> 
         });
         if (employee) return employee.role as SystemRole;
 
-        // 3. Auto-provision @solucoesrkm.com
-        if (user.email.toLowerCase().endsWith('@solucoesrkm.com')) {
+        // 3. Auto-provision @solucoesrkm.com (via emailDomain, não via email cifrado)
+        const adminDomain = process.env.ADMIN_EMAIL_DOMAIN || 'solucoesrkm.com';
+        if (user.emailDomain === adminDomain) {
             // Marca User como EMPLOYEE se ainda não for
             if (user.role !== USER_ROLES.EMPLOYEE) {
                 await prisma.user.update({

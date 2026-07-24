@@ -13,12 +13,16 @@ datasource db {
 }
 
 // ─── User ────────────────────────────────────────────────────────
-// Tabela de usuários. No contexto corporativo, apenas employees
-// acessam o admin. Sem cadastro público — login via seeds/convite.
+// ⚠️ Tabela COMPARTILHADA com o Tracka (mesmo banco Turso). O Tracka é o dono
+// do schema/migrations — este app NUNCA roda migrate/db push (build só faz
+// `prisma generate`). email/name são AES-256-GCM (cifrados) e a busca/login é
+// por emailHash (contrato definido pelo Tracka). Sem cadastro público aqui.
 model User {
   id           String    @id @default(cuid())
-  email        String    @unique
-  name         String?
+  email        String    // AES-256-GCM (cifrado) — NÃO é unique
+  emailHash    String?   @unique // SHA-256(email.toLowerCase()) — chave de busca/login
+  emailDomain  String?   // domínio em claro (ex.: "solucoesrkm.com") — auto-provision
+  name         String?   // AES-256-GCM (cifrado)
   passwordHash String?
   role         String    @default("VIEWER") // SUPERADMIN | EMPLOYEE
   createdAt    DateTime  @default(now())
