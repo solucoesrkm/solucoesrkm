@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { verifyPassword, signToken, setSession, type SessionPayload } from '@/lib/auth';
 import { rateLimit } from '@/infrastructure/security/rate-limiter';
-import { sha256, decrypt } from '@/infrastructure/crypto/crypto';
+import { sha256, decrypt, encrypt } from '@/infrastructure/crypto/crypto';
 
 // 5 tentativas de login por minuto por IP (proteção contra brute force)
 const loginLimiter = rateLimit({ maxRequests: 5, windowMs: 60_000, prefix: 'login' });
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
         const emailInput = email.toLowerCase().trim();
         const user = await prisma.user.findUnique({
             where: { emailHash: sha256(emailInput) },
-            select: { id: true, name: true, passwordHash: true, role: true },
+            select: { id: true, name: true, email: true, passwordHash: true, role: true },
         });
 
         if (!user || !user.passwordHash) {
@@ -42,6 +42,18 @@ export async function POST(req: NextRequest) {
         const valid = await verifyPassword(password, user.passwordHash);
         if (!valid) {
             return NextResponse.json({ error: 'Credenciais inválidas.' }, { status: 401 });
+        }
+
+        // ── Auto-cura do email (mesma lógica do Tracka) ──
+        // O email cifrado pode estar ilegível (rotação de chave sem re-criptografar).
+        // Como o usuário autenticou com o email em texto plano — validado pelo
+        // emailHash, que não usa a ENCRYPTION_KEY — re-criptografamos com a chave
+        // atual quando o valor armazenado não confere. Não bloqueia o login.
+        if (decrypt(user.email) !== emailInput) {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { email: encrypt(emailInput) || emailInput },
+            }).catch((err) => console.warn('[Auth] auto-cura do email falhou', err));
         }
 
         // ── Criar session (com dados decifrados; email digitado é autoritativo) ──
