@@ -71,6 +71,38 @@ function getKey(): Buffer {
 }
 
 /**
+ * Chaves ADICIONAIS aceitas SÓ na descriptografia (nunca na escrita).
+ *
+ * Lida de `PREVIOUS_ENCRYPTION_KEY` — uma ou mais chaves hex de 64 chars
+ * separadas por vírgula. Permite ROTAÇÃO SEM DOWNTIME: ao trocar a
+ * `ENCRYPTION_KEY`, mantém-se a antiga aqui por um período; o app continua
+ * lendo o que foi cifrado com a chave velha. DEVE ficar em sincronia com o
+ * Tracka (mesmo comportamento nos dois apps).
+ */
+function getFallbackKeys(): Buffer[] {
+    const raw = process.env.PREVIOUS_ENCRYPTION_KEY;
+    if (!raw) return [];
+    return raw
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => /^[0-9a-f]{64}$/i.test(s))
+        .map((h) => Buffer.from(h, 'hex'));
+}
+
+/**
+ * Fingerprint da ENCRYPTION_KEY ativa — sha256(chave) truncado. NÃO revela a
+ * chave. Serve para conferir, pelos logs de boot, se a landing e o Tracka usam
+ * EXATAMENTE a mesma chave (fingerprints iguais ⇒ chaves iguais).
+ */
+export function getKeyFingerprint(): string {
+    try {
+        return createHash('sha256').update(getKey()).digest('hex').slice(0, 12);
+    } catch {
+        return 'unavailable';
+    }
+}
+
+/**
  * Criptografa um valor de texto plano.
  * Retorna o valor original se já estiver criptografado (ou vazio/nulo).
  */
@@ -99,29 +131,38 @@ export function decrypt(ciphertext: string | null | undefined): string | null {
     if (!ciphertext) return ciphertext as null;
     if (!isEncrypted(ciphertext)) return ciphertext; // texto plano
 
+    const parts = ciphertext.slice(PREFIX.length).split(':');
+    if (parts.length !== 3) return ''; // formato inválido → ilegível
+
+    const [ivHex, authTagHex, encryptedHex] = parts;
+    const iv = Buffer.from(ivHex, 'hex');
+    const authTag = Buffer.from(authTagHex, 'hex');
+
+    // Tenta a chave atual e, em seguida, as de fallback (PREVIOUS_ENCRYPTION_KEY).
+    // getKey() DENTRO do try: uma ENCRYPTION_KEY ausente/errada não deve derrubar
+    // páginas inteiras na leitura.
+    const keys: Buffer[] = [];
     try {
-        // getKey() DENTRO do try: uma ENCRYPTION_KEY ausente/errada não deve
-        // derrubar páginas inteiras na leitura.
-        const key = getKey();
-
-        const parts = ciphertext.slice(PREFIX.length).split(':');
-        if (parts.length !== 3) return ''; // formato inválido → ilegível
-
-        const [ivHex, authTagHex, encryptedHex] = parts;
-        const iv = Buffer.from(ivHex, 'hex');
-        const authTag = Buffer.from(authTagHex, 'hex');
-
-        const decipher = createDecipheriv(ALGORITHM, key, iv);
-        decipher.setAuthTag(authTag);
-
-        let decrypted = decipher.update(encryptedHex, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-
-        return decrypted;
+        keys.push(getKey());
     } catch (error) {
-        // Cifrado que não decifra com a chave atual (ex.: chave divergente do Tracka).
-        // Devolve vazio para não exibir "enc:..." na UI; o dado bruto continua no banco.
-        console.error('[Crypto] Falha ao descriptografar:', error);
-        return '';
+        console.error('[Crypto] ENCRYPTION_KEY inválida na descriptografia:', error);
     }
+    keys.push(...getFallbackKeys());
+
+    for (const key of keys) {
+        try {
+            const decipher = createDecipheriv(ALGORITHM, key, iv);
+            decipher.setAuthTag(authTag);
+            let decrypted = decipher.update(encryptedHex, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            return decrypted;
+        } catch {
+            // Chave não bate com este valor — tenta a próxima (fallback de rotação).
+        }
+    }
+
+    // Nenhuma chave (atual nem fallback) decifra — ex.: chave divergente do Tracka.
+    // Devolve vazio para não exibir "enc:..." na UI; o dado bruto continua no banco.
+    console.error('[Crypto] Falha ao descriptografar: nenhuma chave (atual/fallback) decifra o valor.');
+    return '';
 }
